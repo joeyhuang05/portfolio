@@ -90,7 +90,7 @@ export function Navbar({ brand = "j. huang", value, onSelect, options = BG_OPTIO
                         {/* Center: links */}
                         <div className="flex-1 flex justify-center">
                             <nav
-                                className="flex items-center gap-6 text-sm"
+                                className="flex items-center space-x-4 text-base"
                                 style={{
                                     color: active.textColor,
                                     opacity: active.textColor === "#fff" ? 0.9 : 1
