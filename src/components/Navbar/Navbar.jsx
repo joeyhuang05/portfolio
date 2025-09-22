@@ -110,10 +110,10 @@ export function Navbar({ brand = "j. huang", value, onSelect, options = BG_OPTIO
                     </div>
 
                     <nav className="flex items-center gap-6 text-sm text-white/90">
-                        <a href="#experience" className="hover:underline underline-offset-4">experience</a>
-                        <a href="#projects" className="hover:underline underline-offset-4">projects</a>
-                        <a href="#contact" className="hover:underline underline-offset-4">contact</a>
-                        <div className="ml-2 font-semibold tracking-wide cursor-pointer">{brand}</div>
+                        <a href="#experience" className="nav__link hover:underline underline-offset-4">experience</a>
+                        <a href="#projects" className="nav__link hover:underline underline-offset-4">projects</a>
+                        <a href="#contact" className="nav__link hover:underline underline-offset-4">contact</a>
+                        <div className="nav__logo">{brand}</div>
                     </nav>
                 </div>
             </div>
