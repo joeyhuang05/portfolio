@@ -1,18 +1,25 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { Navbar } from './components/Navbar/Navbar.jsx'
 // import './App.css'
 
+const BG_BY_KEY = {
+  sunrise: 'bg-blue-900',
+  midday: 'bg-sky-800',
+  sunset: 'bg-rose-900',
+  midnight: 'bg-slate-900',
+};
+
 function App() {
-  const [count, setCount] = useState(0)
+  const [bgKey, setBgKey] = useState('sunrise')
 
   return (
-    <div className="min-h-screen grid place-items-center bg-neutral-900">
-      <h1 className="text-4xl font-bold text-sky-500 border-4 border-sky-500 p-4 rounded-lg">
-        Hello Tailwind
-      </h1>
+    <div className={`${BG_BY_KEY[bgKey] ?? 'bg-neutral-900'} min-h-screen`}>
+      <Navbar bgKey={bgKey} onSelect={setBgKey} />
+      <main className="min-h-screen grid place-items-center text-white">
+        <h1 className="text-4xl font-bold">Placeholder Main Content</h1>
+      </main>
     </div>
-  );
+  )
 }
 
 export default App
