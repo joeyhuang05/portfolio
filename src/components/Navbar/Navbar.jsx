@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import "./Navbar.css"
+import sunriseImg from "../../images/sunrise.png"
+import middayImg from "../../images/midday.png"
+import sunsetImg from "../../images/sunset.png"
+import midnightImg from "../../images/midnight.png"
 
 const BG_OPTIONS = [
-    { key: "sunrise", label: "Sunrise", swatch: "#DCE8F9", src: "/images/sunrise.png"},
-    { key: "midday", label: "Day", swatch: "#A8D9D1", src: "/images/midday.png"},
-    { key: "sunset", label: "Sunset", swatch: "#9D6BC9", src: "/images/sunset.png" },
-    { key: "midnight", label: "Night", swatch: "#383838", src: "/images/midnight.png"}
+    { key: "sunrise", label: "Sunrise", swatch: "#DCE8F9", src: sunriseImg, textColor: "#111C2F"},
+    { key: "midday", label: "Day", swatch: "#A8D9D1", src: middayImg, textColor: "#fff"},
+    { key: "sunset", label: "Sunset", swatch: "#9D6BC9", src: sunsetImg, textColor: "#fff"},
+    { key: "midnight", label: "Night", swatch: "#383838", src: midnightImg, textColor: "#fff"}
 ]
 
 export function Navbar({ brand = "j. huang", value, onSelect, options = BG_OPTIONS}) {
@@ -58,65 +62,99 @@ export function Navbar({ brand = "j. huang", value, onSelect, options = BG_OPTIO
     }
 
     return (
-        <header className="relative z-20 w-full">
-            <div className="mx-auto max-w-6x1 px-4 sm:px-6">
-                <div className="h-14 sm:h-16 flex items-center justify-between">
-                    <div className="relative flex flex-col items-center gap-2">
-                        {/* Trigger */}
-                        <button
-                            ref={btnRef}
-                            type="button"
-                            aria-haspopup="menu"
-                            aria-expanded={open}
-                            aria-controls="bg-dropdown"
-                            onClick={() => {
-                                setSpinning(true);
-                                setTimeout(() => setSpinning(false),
-                            500)
-                                setOpen(o => !o)
-                            }}
-                            className="group inline-flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/15 active:bg-white/20 transition px-2.5 py-1.5 ring-1 ring-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 backdrop-blur"
-                        >
-                            <ColorWheelIcon />
-                        </button>
+        <div
+            className="relative min-h-screen w-full"
+            style={{
+                backgroundImage: `url(${active.src})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+            }}
+        >
+            <header className="relative z-20 w-full">
+                <div className="mx-auto max-w-[1100px] px-9">
+                    <div className="h-14 sm:h-16 flex items-center justify-between w-full">
+                        {/* Left: brand */}
+                        <div className="flex-1 flex justify-start">
+                            <a
+                                href="/"
+                                className="nav__logo flex items-center leading-none"
+                                style={{
+                                    color: active.textColor,
+                                    opacity: active.textColor === "#fff" ? 0.9 : 1
+                                }}
+                            >
+                                {brand}
+                            </a>
+                        </div>
 
-                        {/* Dropdown */}
-                        {open && (
-                            <div ref={panelRef} className="absolute top-full mt-2 left-1/2 -translate-x-1/2 z-30">
-                                <div
-                                    id="bg-dropdown"
-                                    role="menu"
-                                    aria-label="Background options"
-                                    className="rounded-full bg-white/10 backdrop-blur ring-1 ring-white/20 p-1 flex flex-col items-center"
-                                    style={{ width: panelW ? `${panelW}px` : undefined }}
+                        {/* Center: links */}
+                        <div className="flex-1 flex justify-center">
+                            <nav
+                                className="flex items-center gap-6 text-sm"
+                                style={{
+                                    color: active.textColor,
+                                    opacity: active.textColor === "#fff" ? 0.9 : 1
+                                }}
+                            >
+                                <a href="#experience" className="nav__link hover:underline underline-offset-4">experience</a>
+                                <a href="#projects" className="nav__link hover:underline underline-offset-4">projects</a>
+                                <a href="#contact" className="nav__link hover:underline underline-offset-4">contact</a>
+                            </nav>
+                        </div>
+
+                        {/* Right: color wheel */}
+                        <div className="flex-1 flex justify-end">
+                            <div className="fixed bottom-4 right-4 flex flex-col items-center gap-2 z-50">
+                                {/* Trigger */}
+                                <button
+                                    ref={btnRef}
+                                    type="button"
+                                    aria-haspopup="menu"
+                                    aria-expanded={open}
+                                    aria-controls="bg-dropdown"
+                                    onClick={() => {
+                                        setSpinning(true);
+                                        setTimeout(() => setSpinning(false),
+                                    500)
+                                        setOpen(o => !o)
+                                    }}
+                                    className="group inline-flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/15 active:bg-white/20 transition px-2.5 py-1.5 ring-1 ring-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 backdrop-blur"
                                 >
-                                    <div className="flex flex-col gap-1.5 items-center">
-                                        {options.map(opt => (
-                                            <button
-                                                key={opt.key}
-                                                role="menuitemradio"
-                                                aria-checked={opt.key === value}
-                                                onClick={() => { onSelect?.(opt.key); setOpen(false); requestAnimationFrame(() => btnRef.current?.focus()); }}
-                                                className={`relative h-6 w-6 rounded-full overflow-hidden ring-1 ring-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${opt.key===value?"outline outline-2 outline-sky-400":"hover:ring-white/25"}`}
-                                                title={opt.label}
-                                            >
-                                                <div className="absolute inset-0" style={{ background: opt.swatch }} />
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                                    <ColorWheelIcon />
+                                </button>
 
-                    <nav className="flex items-center gap-6 text-sm text-white/90">
-                        <a href="#experience" className="nav__link hover:underline underline-offset-4">experience</a>
-                        <a href="#projects" className="nav__link hover:underline underline-offset-4">projects</a>
-                        <a href="#contact" className="nav__link hover:underline underline-offset-4">contact</a>
-                        <div className="nav__logo">{brand}</div>
-                    </nav>
+                                {/* Dropdown */}
+                                {open && (
+                                    <div ref={panelRef} className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-30">
+                                        <div
+                                            id="bg-dropdown"
+                                            role="menu"
+                                            aria-label="Background options"
+                                            className="rounded-full bg-white/10 backdrop-blur ring-1 ring-white/20 p-1 flex flex-col items-center"
+                                            style={{ width: panelW ? `${panelW}px` : undefined }}
+                                        >
+                                            <div className="flex flex-col gap-1.5 items-center">
+                                                {options.map(opt => (
+                                                    <button
+                                                        key={opt.key}
+                                                        role="menuitemradio"
+                                                        aria-checked={opt.key === value}
+                                                        onClick={() => { onSelect?.(opt.key); setOpen(false); requestAnimationFrame(() => btnRef.current?.focus()); }}
+                                                        className={`relative h-6 w-6 rounded-full overflow-hidden ring-1 ring-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${opt.key===value?"outline outline-2 outline-sky-400":"hover:ring-white/25"}`}
+                                                        title={opt.label}
+                                                    >
+                                                        <div className="absolute inset-0" style={{ background: opt.swatch }} />
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </header>
+            </header>
+        </div>
     )
 }
