@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import "./Navbar.css"
 
 const BG_OPTIONS = [
     { key: "sunrise", label: "Sunrise", swatch: "#DCE8F9", src: "/images/sunrise.png"},
@@ -9,6 +10,7 @@ const BG_OPTIONS = [
 
 export function Navbar({ brand = "j. huang", value, onSelect, options = BG_OPTIONS}) {
     const [open, setOpen] = useState(false);    /* tracks if dropdown is open */
+    const [spinning, setSpinning] = useState(false)
     const btnRef = useRef(null);
     const panelRef = useRef(null);
     const [panelW, setPanelW] = useState(null)
@@ -44,9 +46,9 @@ export function Navbar({ brand = "j. huang", value, onSelect, options = BG_OPTIO
         const mask = "radial-gradient(circle at center, black 60%, transparent 61%)";
         return (
             <div
-                className={className + " rounded-full border border-white/20 shadow-inner"}
+                className={`${className} rounded-full border border-white/20 shadow-inner ${spinning ? "animate-spin" : ""}`}
                 style={{
-                    background: "conic-gradient( #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)",
+                    background: "conic-gradient( #f9c2c2, #f9f9c2, #c2f9c9, #c2f3f9, #c2d1f9, #f3c2f9, #f9c2c2)",
                     WebkitMaskImage: mask,
                     maskImage: mask,
                 }}
@@ -67,9 +69,13 @@ export function Navbar({ brand = "j. huang", value, onSelect, options = BG_OPTIO
                             aria-haspopup="menu"
                             aria-expanded={open}
                             aria-controls="bg-dropdown"
-                            onClick={() => setOpen(o => !o)}
+                            onClick={() => {
+                                setSpinning(true);
+                                setTimeout(() => setSpinning(false),
+                            500)
+                                setOpen(o => !o)
+                            }}
                             className="group inline-flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/15 active:bg-white/20 transition px-2.5 py-1.5 ring-1 ring-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 backdrop-blur"
-                            title="Choose background"
                         >
                             <ColorWheelIcon />
                         </button>
@@ -107,7 +113,7 @@ export function Navbar({ brand = "j. huang", value, onSelect, options = BG_OPTIO
                         <a href="#experience" className="hover:underline underline-offset-4">experience</a>
                         <a href="#projects" className="hover:underline underline-offset-4">projects</a>
                         <a href="#contact" className="hover:underline underline-offset-4">contact</a>
-                        <div className="ml-2 font-semibold tracking-wide">{brand}</div>
+                        <div className="ml-2 font-semibold tracking-wide cursor-pointer">{brand}</div>
                     </nav>
                 </div>
             </div>
