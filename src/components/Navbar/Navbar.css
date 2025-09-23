@@ -11,6 +11,11 @@
     padding: 1rem 1rem;
 }
 
+.nav__link:hover {
+    color: #D5CEE9;
+    transition: all 0.2s ease-in-out;
+}
+
 @keyframes spin {
     to {
         transform: rotate(360deg);
