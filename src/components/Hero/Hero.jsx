@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-import signatureUrl from "../../images/signature.svg?url";
+import signatureUrl from "../../images/signaturev2.svg?url";
 
 export default function Hero() {
     return (
@@ -72,10 +72,10 @@ function AnimatedSVG({
            const fillables = Array.from(svg.querySelectorAll("path, polygon, rect, ellipse, circle"));
            let strokePaths = Array.from(svg.querySelectorAll("path, polyline, line"));
            if (strokePaths.length === 0) {
-            strokePaths = fillables.filter((e1) => el.tagName.toLowerCase() === "path");
+            strokePaths = fillables.filter((el) => el.tagName.toLowerCase() === "path");
            }
 
-           const defs = document.createElementNS("https://www.w3.org/2000/svg", "defs");
+           const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
            const mask = document.createElementNS("http://www.w3.org/2000/svg", "mask");
            const maskId = `handwrite-mask-${Math.random().toString(36).slice(2)}`;
            mask.setAttribute("id", maskId);
