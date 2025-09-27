@@ -18,6 +18,7 @@ function App() {
   ]
 
   const active = BG_OPTIONS.find(o => o.key === bgKey) || BG_OPTIONS[0];
+  const navTextColor = active.textColor;
 
   return (
     <div className={"min-h-screen relative"}>
@@ -32,7 +33,7 @@ function App() {
 
       <div className="relative z-10">
         <Navbar value={bgKey} onSelect={setBgKey} />
-        <Hero />
+        <Hero fillColor={navTextColor} replayKey={bgKey} />
         <main className="grid place-items-center text-white">
           <h1 className="text-4xl font-bold">Placeholder Main Content</h1>
         </main>

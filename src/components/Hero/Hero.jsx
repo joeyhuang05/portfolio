@@ -1,8 +1,19 @@
 import { useEffect, useRef } from "react";
 
-import signatureUrl from "../../images/signaturev2.svg?url";
+import signatureUrl from "../../images/mask.svg?url";
 
-export default function Hero() {
+export default function Hero({
+    brushPathD = "",
+    fillColor = "#ddd",
+    penWidth = 8,
+    left = "10%",
+    top = "20%",
+    width = 300,
+    baseSpeed = 150,
+    gap = 0.3,
+    durationMs = 2400,
+    replayKey,
+}) {
     return (
         <div
             className="relative min-h-screen w-full"
@@ -11,13 +22,16 @@ export default function Hero() {
 
             <AnimatedSVG
                 src={signatureUrl}
-                fillColor="#ddd"
-                penWidth={30}
-                left="10%"
-                top="20%"
-                width={300}
-                baseSpeed={260}
-                gap={0.1}
+                fillColor={fillColor}
+                penWidth={penWidth}
+                left={left}
+                top={top}
+                width={width}
+                baseSpeed={baseSpeed}
+                gap={gap}
+                brushPathD={brushPathD}
+                durationMs={durationMs}
+                replayKey={replayKey}
             />
         </div>
     )
@@ -32,8 +46,12 @@ function AnimatedSVG({
     width = 420,
     baseSpeed = 280,
     gap = 0.12,
+    brushPathD="",
+    durationMs = 2400,
+    replayKey,
 }) {
     const hostRef = useRef(null);
+    const penRef = useRef(null);
 
     useEffect(() => {
         const STYLE_ID = "handwrite-anim-style";
@@ -43,23 +61,23 @@ function AnimatedSVG({
             style.textContent = `@keyframes handwrite { to { stroke-dashoffset: 0; } }`;
             document.head.appendChild(style);
         }
+    }, []);
 
+    useEffect(() => {
         let cancelled = false;
 
         async function loadAndAnimate() {
-            if (!src) return;
+            if (!src || !hostRef.current) return;
+
             let text = "";
             try {
                 const res = await fetch(src);
                 text = await res.text();
             } catch (e) {
-                console.error("Failed to load SVG:", e);
+                console.error("failed to load svg: ", e);
                 return;
             }
             if (cancelled || !hostRef.current) return;
-
-            //text = text.replace(/fill:[^;"]*/g, 'fill:none');
-            //text = text.replace(/fill="#[^"]*"/g, 'fill="none"');
 
             hostRef.current.innerHTML = text;
             const svg = hostRef.current.querySelector("svg");
@@ -67,101 +85,118 @@ function AnimatedSVG({
 
             svg.style.width = "100%";
             svg.style.height = "auto";
-            svg.setAttribute("preserveAspectRatio", "xMinYMin meet")
+            svg.setAttribute("preserveAspectRatio", "xMinYMin meet");
 
-           const fillables = Array.from(svg.querySelectorAll("path, polygon, rect, ellipse, circle"));
-           let strokePaths = Array.from(svg.querySelectorAll("path, polyline, line"));
-           if (strokePaths.length === 0) {
-            strokePaths = fillables.filter((el) => el.tagName.toLowerCase() === "path");
-           }
+            let strokeEls = Array.from(svg.querySelectorAll("path, polyline, line"));
 
-           const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-           const mask = document.createElementNS("http://www.w3.org/2000/svg", "mask");
-           const maskId = `handwrite-mask-${Math.random().toString(36).slice(2)}`;
-           mask.setAttribute("id", maskId);
+            if (strokeEls.length) {
+                let delay = 0;
+                strokeEls.forEach((el) => {
+                    el.style.fill = "none";
+                    el.style.stroke = fillColor;
+                    el.style.strokeWidth = String(penWidth);
+                    el.style.strokeLinecap = "round";
+                    el.style.strokeLinejoin = "round";
 
-           const maskBG = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-           maskBG.setAttribute("x", "0");
-           maskBG.setAttribute("y", "0");
-           const vb = (svg.getAttribute("viewBox") || "0 0 1000 1000").split(" ");
-           maskBG.setAttribute("width", vb[2] || "1000");
-           maskBG.setAttribute("height", vb[3] || "1000");
-           maskBG.setAttribute("fill", "black");
-           mask.appendChild(maskBG);
+                    el.setAttribute("fill", "none");
+                    el.setAttribute("stroke", fillColor);
+                    el.setAttribute("stroke-width", String(penWidth));
+                    el.setAttribute("stroke-linecap", "round");
+                    el.setAttribute("stroke-linejoin", "round");
+
+                    el.setAttribute("vector-effect", "non-scaling-stroke");
+
+                    const len = typeof el.getTotalLength === "function" ? el.getTotalLength() : 0;
+                    if (len > 0) {
+                        el.style.strokeDasharray = `${len}`;
+                        el.style.strokeDashoffset = `${len}`;
+                        const dur = Math.max(0.3, len / baseSpeed);
+                        el.style.animation = `handwrite ${dur}s ${delay}s ease forwards`;
+                        delay += gap;
+                    }
+                });
+                return;
+            }
+
+            const fillables = Array.from(svg.querySelectorAll("path, polygon, rect, ellipse, circle"));
+            if (!fillables.length) return;
+
+            const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+            const mask = document.createElementNS("http://www.w3.org/2000/svg", "mask");
+            const maskId = `handwrite-mask-${Math.random().toString(36).slice(2)}`;
+            mask.setAttribute("id", maskId);
+            mask.setAttribute("maskUnits", "userSpaceOnUse");
+            mask.setAttribute("maskContentUnits", "userSpaceOnUse");
+
+            const maskBG = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            const vb = (svg.getAttribute("viewBox") || "0 0 1000 1000").split(" ");
+            maskBG.setAttribute("x", "0");
+            maskBG.setAttribute("y", "0");
+            maskBG.setAttribute("width", vb[2] || "1000");
+            maskBG.setAttribute("height", vb[3] || "1000");
+            maskBG.setAttribute("fill", "black");
+            mask.appendChild(maskBG);
 
             let delay = 0;
-            strokePaths.forEach((el) => {
+            fillables.forEach((el) => {
                 const tag = el.tagName.toLowerCase();
-                const pen = document.createElementNS("http://www.w3.org/2000/svg", tag);
-                // Copy geometry
-                if (tag === "path") pen.setAttribute("d", el.getAttribute("d") || "");
-                if (tag === "polyline") pen.setAttribute("points", el.getAttribute("points") || "");
-                if (tag === "line") {
-                    pen.setAttribute("x1", el.getAttribute("x1") || "0");
-                    pen.setAttribute("y1", el.getAttribute("y1") || "0");
-                    pen.setAttribute("x2", el.getAttribute("x2") || "0");
-                    pen.setAttribute("y2", el.getAttribute("y2") || "0");
-                }
+                const pen = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                const d = tag === "path" ? (el.getAttribute("d") || "") : "";
+                if (d) pen.setAttribute("d", d);
+
                 pen.setAttribute("fill", "none");
                 pen.setAttribute("stroke", "white");
                 pen.setAttribute("stroke-width", String(penWidth));
                 pen.setAttribute("stroke-linecap", "round");
                 pen.setAttribute("stroke-linejoin", "round");
 
-                // Animate stroke to reveal
                 const len = typeof el.getTotalLength === "function" ? el.getTotalLength() : 0;
                 if (len > 0) {
                     pen.style.strokeDasharray = `${len}`;
                     pen.style.strokeDashoffset = `${len}`;
+
                     const dur = Math.max(0.3, len / baseSpeed);
                     pen.style.animation = `handwrite ${dur}s ${delay}s ease forwards`;
                     delay += gap;
                 }
                 mask.appendChild(pen);
             });
-            
             defs.appendChild(mask);
 
-            // Build a filled version of the art that will be revealed by the mask
-            const filledGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-            filledGroup.setAttribute("mask", `url(#${maskId})`);
+            const revealed = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            revealed.setAttribute("mask", `url(#${maskId})`);
             fillables.forEach((el) => {
                 const tag = el.tagName.toLowerCase();
                 const clone = document.createElementNS("http://www.w3.org/2000/svg", tag);
-                // Copy geometry
+
                 if (tag === "path") clone.setAttribute("d", el.getAttribute("d") || "");
                 if (tag === "polygon") clone.setAttribute("points", el.getAttribute("points") || "");
                 if (tag === "rect") {
-                    clone.setAttribute("x", el.getAttribute("x") || "0");
-                    clone.setAttribute("y", el.getAttribute("y") || "0");
-                    clone.setAttribute("width", el.getAttribute("width") || "0");
-                    clone.setAttribute("height", el.getAttribute("height") || "0");
-                    if (el.getAttribute("rx")) clone.setAttribute("rx", el.getAttribute("rx"));
-                    if (el.getAttribute("ry")) clone.setAttribute("ry", el.getAttribute("ry"));
-                }
-                if (tag === "ellipse" || tag === "circle") {
-                    // ellipse: cx, cy, rx, ry; circle: cx, cy, r
-                    ["cx","cy","rx","ry","r"].forEach((a) => {
-                        if (el.getAttribute(a)) clone.setAttribute(a, el.getAttribute(a));
+                    ["x", "y", "width", "height", "rx", "ry"].forEach(a => {
+                        const v = el.getAttribute(a);
+                        if (v != null) clone.setAttribute(a, v);
                     });
                 }
-                // Apply ink color
+                if (tag === "ellipse" || tag === "circle") {
+                    ["cx", "cy", "rx", "ry", "r"].forEach(a => {
+                        const v = el.getAttribute(a);
+                        if (v != null) clone.setAttribute(a, v);
+                    });
+                }
+
                 clone.setAttribute("fill", fillColor);
                 clone.setAttribute("stroke", fillColor);
-                filledGroup.appendChild(clone);
+                revealed.appendChild(clone);
             });
 
-            // Replace original contents: <defs> then filled art
             while (svg.firstChild) svg.removeChild(svg.firstChild);
             svg.appendChild(defs);
-            svg.appendChild(filledGroup);
+            svg.appendChild(revealed);
         }
 
         loadAndAnimate();
-        return () => {
-            cancelled = true;
-        };
-    }, [src, fillColor, penWidth, baseSpeed, gap]);
+        return () => { cancelled = true };
+    }, [src, fillColor, penWidth, baseSpeed, gap, durationMs, replayKey]);
 
     return (
         <div
@@ -172,8 +207,7 @@ function AnimatedSVG({
                 top,
                 width,
                 pointerEvents: "none",
-                zIndex: 60,
-                border: "1px solid red",
+                // border: "1px solid red",
                 transform: "translate(40%, 20%)"
             }}
         />
