@@ -1,19 +1,19 @@
 import { useEffect, useRef } from "react";
 
 import signatureUrl from "../../images/mask.svg?url";
+import introUrl from "../../images/intro.svg?url";
 
 export default function Hero({
-    brushPathD = "",
     fillColor = "#ddd",
     penWidth = 8,
-    left = "10%",
-    top = "20%",
+    introPenWidth = 6,
     width = 300,
     baseSpeed = 150,
     gap = 0.3,
     durationMs = 2400,
     replayKey,
 }) {
+
     return (
         <div
             className="relative min-h-screen w-full"
@@ -24,12 +24,23 @@ export default function Hero({
                 src={signatureUrl}
                 fillColor={fillColor}
                 penWidth={penWidth}
-                left={left}
-                top={top}
+                left="10%"
+                top="20%"
                 width={width}
                 baseSpeed={baseSpeed}
                 gap={gap}
-                brushPathD={brushPathD}
+                durationMs={durationMs}
+                replayKey={replayKey}
+            />
+            <AnimatedSVG
+                src={introUrl}
+                fillColor={fillColor}
+                penWidth={introPenWidth}
+                left="60%"
+                top="20%"
+                width={width}
+                baseSpeed={baseSpeed}
+                gap={gap}
                 durationMs={durationMs}
                 replayKey={replayKey}
             />
@@ -46,7 +57,6 @@ function AnimatedSVG({
     width = 420,
     baseSpeed = 280,
     gap = 0.12,
-    brushPathD="",
     durationMs = 2400,
     replayKey,
 }) {
